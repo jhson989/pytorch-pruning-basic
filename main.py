@@ -3,12 +3,10 @@ from hmac import trans_36
 import random
 
 import torch
-import torch.nn.utils.prune as prune
 from Dataloader import getDataLoader
 
 from utils import Logger, printModelSize
 from Model import LeNet
-from Trainer import Tranier
 
 
 #############################################################
@@ -24,6 +22,7 @@ def argParsing():
     parser.add_argument("--batchSize", type=int, default=128, help="input batch size")
     parser.add_argument("--lr", nargs="+", type=float, default=(1e-4), help="learing rate : Gen Dis")
     parser.add_argument("--manualSeed", type=int, default=1, help="manual seed")
+    parser.add_argument("--pruneFreq", type=int, default="2", help="log term") 
     ## Environment
     parser.add_argument("--ngpu", type=int, default=1, help="number of gpus")
     parser.add_argument("--numWorkers", type=int, default=5, help="number of workers for dataloader")
@@ -31,6 +30,7 @@ def argParsing():
     parser.add_argument("--savePath", type=str, default="./result/1/", help="path to save folder") 
     parser.add_argument("--logFreq", type=int, default="100", help="log term") 
 
+    
     
     args = parser.parse_args()
     return args
@@ -52,6 +52,8 @@ def setEnv(args):
     
     if args.ngpu == 1:
         args.device = torch.device("cuda")
+    else :
+        args.device = torch.device("cpu")
 
 
 if __name__ == "__main__":
@@ -72,10 +74,12 @@ if __name__ == "__main__":
         testDataLoader = getDataLoader(False, args, logger)
 
         # Define trainer
+        #from Trainer import Tranier
+        from PruningTrainer import Tranier
         trainer = Tranier(args=args, logger=logger)
 
         # Start training
-        trainer.train(model, trainDataLoader, testDataLoader)
+        trainer.train(model, trainDataLoader, testDataLoader, 0.8)
 
     else :
         logger.log("[[[Evalution]]] Eval started..")

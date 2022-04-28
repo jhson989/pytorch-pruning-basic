@@ -1,6 +1,7 @@
 from audioop import avg
 import torch
 import torch.optim as optim
+import torch.nn.utils.prune as prune
 from torch import nn
 
 class Tranier:
@@ -14,11 +15,12 @@ class Tranier:
         ### Train Policy
         # criterion
         self.crit = nn.CrossEntropyLoss().to(self.args.device)
-        
+        self.pruned = False
 
-    def train(self, model, dataLoader, evalDataLoader=None):
+    def train(self, model, dataLoader, evalDataLoader=None, amount=0.1):
 
         ### Data
+        self.amount = amount
         self.dataLoader = dataLoader
         self.evalDataLoader = evalDataLoader
 
@@ -26,8 +28,14 @@ class Tranier:
         self.model = model
         self.optimizer = optim.Adam(self.model.parameters(), lr=self.args.lr)
 
+
+
         ### Training iteration
         for epoch in range(self.args.numEpoch):
+
+            ### Prune
+            if epoch % self.args.pruneFreq == 0:   
+                self.prune()
 
             ### Train
             avgLoss = 0.0
@@ -73,3 +81,32 @@ class Tranier:
             ### Logging
             self.logger.log("Eval loss : CE(%.3f)" 
                     % (avgLoss/len(evalDataLoader)))
+
+    def prune(self):
+        print("pruned")
+        if self.pruned == True :
+            self.remove()
+
+        self.pruned = True
+        for name, module in self.model.named_modules():
+            if isinstance(module, torch.nn.Conv2d):
+                prune.l1_unstructured(module, name='weight', amount=self.amount)
+            # prune 40% of connections in all linear layers
+            elif isinstance(module, torch.nn.Linear):
+                prune.l1_unstructured(module, name='weight', amount=self.amount)
+
+
+
+    def remove(self):
+        print("removed")
+        if self.pruned == False:
+            return
+
+        self.pruned = False
+        for name, module in self.model.named_modules():
+            if isinstance(module, torch.nn.Conv2d):
+                prune.remove(module, 'weight')
+            # prune 40% of connections in all linear layers
+            elif isinstance(module, torch.nn.Linear):
+                prune.remove(module, 'weight')
+
