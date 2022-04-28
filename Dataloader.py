@@ -24,7 +24,7 @@ def getDataLoader(train, args, logger):
             batch_size = args.batchSize,
             shuffle=True,
             num_workers=args.numWorkers,
-            drop_last=True,
+            drop_last=True
         )
 
     else :
@@ -37,7 +37,7 @@ def getDataLoader(train, args, logger):
 
         return torch.utils.data.DataLoader(
             dataset=testDataset,
-            batch_size = 1,
+            batch_size = args.batchSize,
             shuffle=False,
-            num_workers=1
+            num_workers=args.numWorkers
         )
