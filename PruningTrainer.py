@@ -86,12 +86,10 @@ class Tranier:
         if self.pruned == True :
             self.remove()
 
-        print("pruned")
         self.pruned = True
         for name, module in self.model.named_modules():
             if isinstance(module, torch.nn.Conv2d):
                 prune.l1_unstructured(module, name='weight', amount=self.args.pruneAmount)
-            # prune 40% of connections in all linear layers
             elif isinstance(module, torch.nn.Linear):
                 prune.l1_unstructured(module, name='weight', amount=self.args.pruneAmount)
 
@@ -101,12 +99,10 @@ class Tranier:
         if self.pruned == False:
             return
             
-        print("removed")
         self.pruned = False
         for name, module in self.model.named_modules():
             if isinstance(module, torch.nn.Conv2d):
                 prune.remove(module, 'weight')
-            # prune 40% of connections in all linear layers
             elif isinstance(module, torch.nn.Linear):
                 prune.remove(module, 'weight')
 
