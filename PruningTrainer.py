@@ -88,11 +88,9 @@ class Tranier:
 
         self.pruned = True
         for name, module in self.model.named_modules():
-            if isinstance(module, torch.nn.Conv2d):
+            if isinstance(module, torch.nn.Conv2d) or isinstance(module, torch.nn.Linear):
                 prune.l1_unstructured(module, name='weight', amount=self.args.pruneAmount)
-            elif isinstance(module, torch.nn.Linear):
-                prune.l1_unstructured(module, name='weight', amount=self.args.pruneAmount)
-
+                prune.l1_unstructured(module, name='bias', amount=self.args.pruneAmount)
 
 
     def remove(self):
@@ -101,8 +99,7 @@ class Tranier:
             
         self.pruned = False
         for name, module in self.model.named_modules():
-            if isinstance(module, torch.nn.Conv2d):
+            if isinstance(module, torch.nn.Conv2d) or isinstance(module, torch.nn.Linear):
                 prune.remove(module, 'weight')
-            elif isinstance(module, torch.nn.Linear):
-                prune.remove(module, 'weight')
+                prune.remove(module, 'bias')
 

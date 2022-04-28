@@ -22,7 +22,7 @@ def argParsing():
     parser.add_argument("--batchSize", type=int, default=128, help="input batch size")
     parser.add_argument("--lr", nargs="+", type=float, default=(1e-4), help="learing rate : Gen Dis")
     parser.add_argument("--manualSeed", type=int, default=1, help="manual seed")
-    parser.add_argument("--pruneAmount", type=float, default="0.99", help="pruning amount (ratio)") 
+    parser.add_argument("--pruneAmount", type=float, default="0.97", help="pruning amount (ratio)") 
     parser.add_argument("--pruneFreq", type=int, default="1", help="pruning term") 
     ## Environment
     parser.add_argument("--ngpu", type=int, default=1, help="number of gpus")
