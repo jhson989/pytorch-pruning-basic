@@ -17,10 +17,9 @@ class Tranier:
         self.crit = nn.CrossEntropyLoss().to(self.args.device)
         self.pruned = False
 
-    def train(self, model, dataLoader, evalDataLoader=None, amount=0.1):
+    def train(self, model, dataLoader, evalDataLoader=None):
 
         ### Data
-        self.amount = amount
         self.dataLoader = dataLoader
         self.evalDataLoader = evalDataLoader
 
@@ -83,25 +82,26 @@ class Tranier:
                     % (avgLoss/len(evalDataLoader)))
 
     def prune(self):
-        print("pruned")
+        
         if self.pruned == True :
             self.remove()
 
+        print("pruned")
         self.pruned = True
         for name, module in self.model.named_modules():
             if isinstance(module, torch.nn.Conv2d):
-                prune.l1_unstructured(module, name='weight', amount=self.amount)
+                prune.l1_unstructured(module, name='weight', amount=self.args.pruneAmount)
             # prune 40% of connections in all linear layers
             elif isinstance(module, torch.nn.Linear):
-                prune.l1_unstructured(module, name='weight', amount=self.amount)
+                prune.l1_unstructured(module, name='weight', amount=self.args.pruneAmount)
 
 
 
     def remove(self):
-        print("removed")
         if self.pruned == False:
             return
-
+            
+        print("removed")
         self.pruned = False
         for name, module in self.model.named_modules():
             if isinstance(module, torch.nn.Conv2d):
