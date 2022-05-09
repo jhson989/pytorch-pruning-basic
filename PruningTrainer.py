@@ -16,8 +16,11 @@ class Tranier:
         # criterion
         self.crit = nn.CrossEntropyLoss().to(self.args.device)
         self.pruned = False
+        self.bestLoss = 2.0
 
     def train(self, model, dataLoader, evalDataLoader=None):
+
+        print("Prune trainer")
 
         ### Data
         self.dataLoader = dataLoader
@@ -59,10 +62,11 @@ class Tranier:
 
             ### Eval
             if self.evalDataLoader is not None :
-                self.eval(self.evalDataLoader)
+                self.eval(self.evalDataLoader, epoch)
+                
 
 
-    def eval(self, evalDataLoader):
+    def eval(self, evalDataLoader, epoch):
         
         ### Eval
         self.model.eval()
@@ -78,8 +82,14 @@ class Tranier:
                 avgLoss = avgLoss + loss.item()
 
             ### Logging
+            avgLoss = avgLoss/len(evalDataLoader)
             self.logger.log("Eval loss : CE(%.3f)" 
-                    % (avgLoss/len(evalDataLoader)))
+                    % (avgLoss))
+
+            if avgLoss < self.bestLoss :
+                self.bestLoss = avgLoss
+                self.save(epoch)
+
 
     def prune(self):
         
@@ -103,3 +113,11 @@ class Tranier:
                 prune.remove(module, 'weight')
                 prune.remove(module, 'bias')
 
+
+    def save(self, numEpoch):
+        filename = self.args.savePath + "%d.pth" % numEpoch
+        torch.save(self.model.state_dict(), filename)
+
+    def load(self, filename):
+        filename = self.args.savePath + filename
+        torch.load_state_dict(torch.load(filename))

@@ -17,6 +17,7 @@ def argParsing():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--train", type=bool, default=True, help="train mode")
+    parser.add_argument("--prune", type=bool, default=True, help="Pruning")
     ## Training policy
     parser.add_argument("--numEpoch", type=int, default=2000, help="num of epoch")
     parser.add_argument("--batchSize", type=int, default=128, help="input batch size")
@@ -75,8 +76,11 @@ if __name__ == "__main__":
         testDataLoader = getDataLoader(False, args, logger)
 
         # Define trainer
-        #from Trainer import Tranier
-        from PruningTrainer import Tranier
+        if args.prune == True:
+            from PruningTrainer import Tranier    
+        else:
+            from Trainer import Tranier
+        
         trainer = Tranier(args=args, logger=logger)
 
         # Start training
