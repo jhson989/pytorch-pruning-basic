@@ -1,4 +1,3 @@
-from audioop import avg
 import torch
 import torch.optim as optim
 from torch import nn

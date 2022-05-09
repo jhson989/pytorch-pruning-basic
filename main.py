@@ -1,5 +1,4 @@
 import argparse, os
-from hmac import trans_36
 import random
 
 import torch
